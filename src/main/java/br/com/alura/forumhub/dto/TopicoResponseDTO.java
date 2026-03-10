@@ -1,6 +1,7 @@
 package br.com.alura.forumhub.dto;
 
 import br.com.alura.forumhub.entity.Topico;
+
 import java.time.LocalDateTime;
 
 public record TopicoResponseDTO(
@@ -24,5 +25,4 @@ public record TopicoResponseDTO(
                 topico.getCurso()
         );
     }
-
 }

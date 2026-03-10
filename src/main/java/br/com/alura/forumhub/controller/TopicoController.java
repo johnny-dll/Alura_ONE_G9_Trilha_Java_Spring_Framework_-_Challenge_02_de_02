@@ -1,6 +1,7 @@
 package br.com.alura.forumhub.controller;
 
 import br.com.alura.forumhub.dto.DadosCadastroTopico;
+import br.com.alura.forumhub.dto.TopicoResponseDTO;
 import br.com.alura.forumhub.entity.Topico;
 import br.com.alura.forumhub.repository.TopicoRepository;
 
@@ -20,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/topicos")
@@ -28,23 +30,19 @@ public class TopicoController {
     @Autowired
     private TopicoRepository repository;
 
-
     // =============================
     // CADASTRAR TÓPICO
     // =============================
 
     @PostMapping
-    public ResponseEntity<?> cadastrar(@RequestBody @Valid DadosCadastroTopico dados,
-                                       UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<TopicoResponseDTO> cadastrar(
+            @RequestBody @Valid DadosCadastroTopico dados,
+            UriComponentsBuilder uriBuilder) {
 
-        // Verifica duplicidade
         if (repository.existsByTituloAndMensagem(dados.titulo(), dados.mensagem())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Já existe um tópico cadastrado com este título e mensagem.");
+            return ResponseEntity.badRequest().build();
         }
 
-        // Cria o tópico
         Topico topico = new Topico(
                 dados.titulo(),
                 dados.mensagem(),
@@ -56,12 +54,14 @@ public class TopicoController {
 
         repository.save(topico);
 
-        // Cria URI do recurso recém-criado
-        URI uri = uriBuilder.path("/topicos/{id}")
+        URI uri = uriBuilder
+                .path("/topicos/{id}")
                 .buildAndExpand(topico.getId())
                 .toUri();
 
-        return ResponseEntity.created(uri).body(topico);
+        return ResponseEntity
+                .created(uri)
+                .body(new TopicoResponseDTO(topico));
     }
 
 
@@ -70,14 +70,38 @@ public class TopicoController {
     // =============================
 
     @GetMapping
-    public Page<Topico> listar(
+    public ResponseEntity<Page<TopicoResponseDTO>> listar(
+
             @PageableDefault(
                     size = 10,
                     sort = "dataCriacao",
                     direction = Sort.Direction.ASC
             ) Pageable pageable
+
     ) {
-        return repository.findAll(pageable);
+
+        Page<TopicoResponseDTO> page = repository
+                .findAll(pageable)
+                .map(TopicoResponseDTO::new);
+
+        return ResponseEntity.ok(page);
+    }
+
+
+    // =============================
+    // DETALHAR TÓPICO
+    // =============================
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TopicoResponseDTO> detalhar(@PathVariable Long id) {
+
+        Optional<Topico> topico = repository.findById(id);
+
+        if (topico.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(new TopicoResponseDTO(topico.get()));
     }
 
 }
