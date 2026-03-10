@@ -24,14 +24,14 @@ public class TopicoController {
     public ResponseEntity<?> cadastrar(@RequestBody @Valid DadosCadastroTopico dados,
                                        UriComponentsBuilder uriBuilder) {
 
-        // Verificação de duplicidade
+        // Verifica duplicidade
         if (repository.existsByTituloAndMensagem(dados.titulo(), dados.mensagem())) {
             return ResponseEntity
                     .badRequest()
                     .body("Já existe um tópico cadastrado com este título e mensagem.");
         }
 
-        // Criação do tópico
+        // Cria o tópico
         Topico topico = new Topico(
                 dados.titulo(),
                 dados.mensagem(),
@@ -43,7 +43,7 @@ public class TopicoController {
 
         repository.save(topico);
 
-        // Criação da URI do recurso recém-criado
+        // Cria URI do recurso recém-criado
         URI uri = uriBuilder.path("/topicos/{id}")
                 .buildAndExpand(topico.getId())
                 .toUri();
