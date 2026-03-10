@@ -1,2 +1,1 @@
-ALTER TABLE topicos ADD COLUMN autor VARCHAR(255) NOT NULL;
-ALTER TABLE topicos ADD COLUMN curso VARCHAR(255) NOT NULL;
+-- migration removida pois as colunas já existem na V1
