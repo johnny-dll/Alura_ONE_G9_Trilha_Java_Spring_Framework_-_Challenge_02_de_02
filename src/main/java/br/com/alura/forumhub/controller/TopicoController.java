@@ -5,8 +5,16 @@ import br.com.alura.forumhub.entity.Topico;
 import br.com.alura.forumhub.repository.TopicoRepository;
 
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -19,6 +27,11 @@ public class TopicoController {
 
     @Autowired
     private TopicoRepository repository;
+
+
+    // =============================
+    // CADASTRAR TÓPICO
+    // =============================
 
     @PostMapping
     public ResponseEntity<?> cadastrar(@RequestBody @Valid DadosCadastroTopico dados,
@@ -50,4 +63,21 @@ public class TopicoController {
 
         return ResponseEntity.created(uri).body(topico);
     }
+
+
+    // =============================
+    // LISTAR TÓPICOS
+    // =============================
+
+    @GetMapping
+    public Page<Topico> listar(
+            @PageableDefault(
+                    size = 10,
+                    sort = "dataCriacao",
+                    direction = Sort.Direction.ASC
+            ) Pageable pageable
+    ) {
+        return repository.findAll(pageable);
+    }
+
 }
